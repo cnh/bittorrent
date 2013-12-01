@@ -39,23 +39,25 @@ class BitTorrentClient(object):
         self._port = 6881
 
         # Set up an amp control channel
-        d = (TCP4ServerEndpoint(reactor, _AMP_CONTROL_PORT, 5, 'localhost')
-             .listen(AMPControlServerFactory(self)))
+        # d = (TCP4ServerEndpoint(reactor, _AMP_CONTROL_PORT, 5, 'localhost')
+        #      .listen(AMPControlServerFactory(self)))
 
         def cannotListen(failure):
             # Schedule a clean program exit for after the reactor is running
             self._reactor.callLater(.01, self.quit)
             logger.critical("Cannot listen on control port localhost:{}"
                             .format(_AMP_CONTROL_PORT))
-        d.addErrback(cannotListen)
+        # d.addErrback(cannotListen)
 
         # Schedule any torrents named on the command line to be added after
         # the reactor is running
-        for filename in sys.argv[1:]:
-            self._reactor.callLater(.01, self.add_torrent, (filename))
+        # for filename in sys.argv[1:]:
+        #    self._reactor.callLater(.01, self.add_torrent, (filename))
 
+        self._reactor.callLater(.01, self.add_torrent, (sys.argv[1]))
         # The following call starts the reactor
-        HTTPControlServer(self).app.run('localhost', 8080)
+        # HTTPControlServer(self).app.run('localhost', 8080)
+        reactor.run()
 
     # Control channel functions
 
@@ -88,7 +90,10 @@ class BitTorrentClient(object):
                 raise MsgError("Already serving {} (key: {})"
                                .format(filename, info_hash))
 
-            torrent.start()
+            def done(value):
+                reactor.stop()
+
+            torrent.start().addCallback(done)
 
             self._torrents[info_hash] = torrent
 

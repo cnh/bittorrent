@@ -66,6 +66,7 @@ class TorrentMgr(object):
         self._peer_id = peer_id
         self._reactor = reactor
         self._state = self._States.Uninitialized
+        self._completionDeferred = None
 
     def initialize(self):
         """
@@ -161,6 +162,9 @@ class TorrentMgr(object):
         self._state = self._States.Started
 
         self._connect_to_peers(20)
+
+        self._completionDeferred = Deferred()
+        return self._completionDeferred
 
     def percent(self):
         if not self._state == self._States.Uninitialized:
@@ -429,6 +433,7 @@ class TorrentMgr(object):
                 else:
                     logger.info("Successfully downloaded entire torrent {}"
                                 .format(self._filename))
+                    self._completionDeferred.callback(self._filename)
 
     def peer_interested(self, peer):
         pass
