@@ -16,6 +16,7 @@ exhausted, it should also get more peers from the tracker.
 import bencode
 import logging
 import sys
+import urllib
 
 from twisted.internet.defer import Deferred
 from twisted.web.client import getPage
@@ -47,7 +48,7 @@ class TrackerProxy(object):
         not contain required fields.
         """
 
-        params = {'info_hash': self._metainfo.info_hash,
+        params = {'info_hash': urllib.quote(self._metainfo.info_hash),
                   'peer_id': self._peer_id,
                   'port': self._port,
                   'uploaded': 0,
