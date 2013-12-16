@@ -4,9 +4,9 @@ and provides information about peers upon request.  During initialization, the
 TrackerProxy raises a TrackereError if the tracker can't be contacted or
 returns an invalid response.
 
-This blocking TrackerProxy should be made non-blocking.  
+This blocking TrackerProxy should be made non-blocking.
 
-Right now, this client doesn't support multiple trackers specified by 
+Right now, this client doesn't support multiple trackers specified by
 announce-list in the Metainfo object.
 
 If the peer list is exhausted, should the TrackerProxy go back and get more
@@ -18,6 +18,7 @@ import bencode
 import logging
 import requests
 import sys
+import urllib
 
 logger = logging.getLogger('bt.trackerproxy')
 
@@ -30,7 +31,7 @@ class TrackerProxy(object):
         self._port = port
         self._peer_id = peer_id
 
-        params = {'info_hash': self._metainfo.info_hash, 
+        params = {'info_hash': self._metainfo.info_hash,
                   'peer_id': self._peer_id,
                   'port': self._port,
                   'uploaded': 0,
@@ -83,12 +84,9 @@ class TrackerProxy(object):
 
     def get_peers(self, num):
         if (len(self._peers) <= num):
+
             num = len(self._peers)
 
         peers = self._peers[:num]
         self._peers = self._peers[num:]
         return peers
-            
-
-            
-
